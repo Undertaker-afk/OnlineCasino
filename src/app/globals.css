@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-casino-darker text-white font-sans;
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(220, 20, 60, 0.1) 0%, transparent 50%);
+  }
+}
+
+@layer components {
+  .casino-button {
+    @apply px-6 py-3 bg-gold-gradient text-black font-bold rounded-lg 
+           shadow-lg hover:shadow-xl transform hover:scale-105 
+           transition-all duration-200 active:scale-95;
+  }
+  
+  .casino-card {
+    @apply bg-white text-black rounded-lg shadow-lg p-4 
+           transform transition-all duration-300;
+  }
+  
+  .casino-chip {
+    @apply rounded-full border-4 border-white shadow-lg 
+           flex items-center justify-center font-bold text-white
+           transform transition-all duration-200 hover:scale-110
+           cursor-pointer select-none;
+  }
+  
+  .roulette-wheel {
+    @apply rounded-full border-8 border-casino-gold relative
+           transform transition-transform duration-1000 ease-out;
+  }
+  
+  .slot-reel {
+    @apply bg-casino-dark border-2 border-casino-gold rounded-lg
+           overflow-hidden relative;
+  }
+  
+  .game-table {
+    @apply bg-casino-table rounded-xl border-4 border-casino-gold
+           shadow-2xl p-8;
+  }
+  
+  .neon-glow {
+    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+  }
+  
+  .chip-stack {
+    @apply relative transform-gpu;
+  }
+  
+  .chip-stack::after {
+    content: '';
+    @apply absolute inset-0 rounded-full bg-white opacity-20 
+           transform scale-110 animate-pulse;
+  }
+}
+
+@keyframes cardFlip {
+  0% { transform: rotateY(0deg); }
+  50% { transform: rotateY(90deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+@keyframes rouletteSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1440deg); }
+}
+
+@keyframes slotSpin {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-100px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes chipBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.card-flip {
+  animation: cardFlip 0.6s ease-in-out;
+}
+
+.roulette-spin {
+  animation: rouletteSpin 4s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.slot-spin {
+  animation: slotSpin 2s ease-in-out;
+}
+
+.chip-bounce {
+  animation: chipBounce 0.5s ease-in-out;
+}
