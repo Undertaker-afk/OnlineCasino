@@ -10,6 +10,7 @@ import {
   isBlackjack, 
   generateId 
 } from '@/lib/gameUtils';
+import { saveGameSession } from '@/lib/gameSessionStorage';
 import { 
   ArrowLeft, 
   Plus, 
@@ -235,6 +236,14 @@ export default function BlackjackPage() {
     if (winAmount > 0) {
       dispatch({ type: 'UPDATE_BALANCE', payload: state.gameState.balance + winAmount });
     }
+
+    // Spielsitzung speichern
+    saveGameSession({
+      gameType: 'blackjack',
+      betAmount: gameState.betAmount,
+      winAmount: winAmount,
+      result: result
+    });
 
     setShowDealerCards(true);
   };

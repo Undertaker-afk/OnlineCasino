@@ -9,6 +9,7 @@ import {
   getRouletteNumberProperties, 
   generateId 
 } from '@/lib/gameUtils';
+import { saveGameSession } from '@/lib/gameSessionStorage';
 import { 
   ArrowLeft, 
   Play, 
@@ -130,6 +131,14 @@ export default function RoulettePage() {
       if (totalWin > 0) {
         dispatch({ type: 'UPDATE_BALANCE', payload: state.gameState.balance + totalWin });
       }
+
+      // Spielsitzung speichern
+      saveGameSession({
+        gameType: 'roulette',
+        betAmount: totalBetAmount,
+        winAmount: totalWin,
+        result: result
+      });
     }, 3000);
   };
 

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/components/Providers';
 import { SlotSymbol } from '@/types';
 import { generateId } from '@/lib/gameUtils';
+import { saveGameSession } from '@/lib/gameSessionStorage';
 import { 
   ArrowLeft, 
   Play, 
