@@ -163,6 +163,25 @@ export default function SlotsPage() {
         dispatch({ type: 'UPDATE_BALANCE', payload: state.gameState.balance + finalWin });
       }
 
+      // Spielsitzung speichern
+      try {
+        const gameSession = {
+          id: 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2),
+          gameType: 'slots' as const,
+          betAmount: betAmount,
+          winAmount: finalWin,
+          result: result,
+          date: new Date().toISOString(),
+          profit: finalWin - betAmount
+        };
+        
+        const existingSessions = JSON.parse(localStorage.getItem('casino_game_sessions') || '[]');
+        existingSessions.push(gameSession);
+        localStorage.setItem('casino_game_sessions', JSON.stringify(existingSessions));
+      } catch (error) {
+        console.error('Fehler beim Speichern der Spielsitzung:', error);
+      }
+
       // Auto-Play fortsetzen
       if (autoPlay && autoPlayCount > 1) {
         setAutoPlayCount(prev => prev - 1);

@@ -10,7 +10,6 @@ import {
   isBlackjack, 
   generateId 
 } from '@/lib/gameUtils';
-import { saveGameSession } from '@/lib/gameSessionStorage';
 import { 
   ArrowLeft, 
   Plus, 
@@ -238,12 +237,23 @@ export default function BlackjackPage() {
     }
 
     // Spielsitzung speichern
-    saveGameSession({
-      gameType: 'blackjack',
-      betAmount: gameState.betAmount,
-      winAmount: winAmount,
-      result: result
-    });
+    try {
+      const gameSession = {
+        id: 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2),
+        gameType: 'blackjack' as const,
+        betAmount: gameState.betAmount,
+        winAmount: winAmount,
+        result: result,
+        date: new Date().toISOString(),
+        profit: winAmount - gameState.betAmount
+      };
+      
+      const existingSessions = JSON.parse(localStorage.getItem('casino_game_sessions') || '[]');
+      existingSessions.push(gameSession);
+      localStorage.setItem('casino_game_sessions', JSON.stringify(existingSessions));
+    } catch (error) {
+      console.error('Fehler beim Speichern der Spielsitzung:', error);
+    }
 
     setShowDealerCards(true);
   };
@@ -290,26 +300,31 @@ export default function BlackjackPage() {
                     animate={{ scale: 1, rotate: 0 }}
                     exit={{ scale: 0 }}
                     transition={{ delay: index * 0.2 }}
-                    className={`casino-card w-20 h-28 flex flex-col justify-between ${
+                    className={`casino-card w-20 h-28 flex flex-col p-2 ${
                       index === 1 && !showDealerCards ? 'bg-casino-red' : ''
                     }`}
                   >
                     {index === 1 && !showDealerCards ? (
-                      <div className="flex items-center justify-center h-full text-white font-bold">
+                      <div className="flex items-center justify-center h-full text-white font-bold text-2xl">
                         ?
                       </div>
                     ) : (
                       <>
-                        <div className={`text-left ${SUIT_COLORS[card.suit]}`}>
+                        {/* Obere linke Ecke */}
+                        <div className={`flex flex-col items-start text-xs leading-none ${SUIT_COLORS[card.suit]}`}>
                           <div className="font-bold">{card.rank}</div>
-                          <div className="text-xl">{CARD_SUITS[card.suit]}</div>
+                          <div className="text-sm">{CARD_SUITS[card.suit]}</div>
                         </div>
-                        <div className={`text-center text-3xl ${SUIT_COLORS[card.suit]}`}>
+                        
+                        {/* Mittleres großes Symbol */}
+                        <div className={`flex-1 flex items-center justify-center text-2xl ${SUIT_COLORS[card.suit]}`}>
                           {CARD_SUITS[card.suit]}
                         </div>
-                        <div className={`text-right transform rotate-180 ${SUIT_COLORS[card.suit]}`}>
+                        
+                        {/* Untere rechte Ecke (umgedreht) */}
+                        <div className={`flex flex-col-reverse items-end text-xs leading-none transform rotate-180 ${SUIT_COLORS[card.suit]}`}>
                           <div className="font-bold">{card.rank}</div>
-                          <div className="text-xl">{CARD_SUITS[card.suit]}</div>
+                          <div className="text-sm">{CARD_SUITS[card.suit]}</div>
                         </div>
                       </>
                     )}
@@ -364,18 +379,23 @@ export default function BlackjackPage() {
                     animate={{ scale: 1, rotate: 0 }}
                     exit={{ scale: 0 }}
                     transition={{ delay: index * 0.2 }}
-                    className="casino-card w-20 h-28 flex flex-col justify-between"
+                    className="casino-card w-20 h-28 flex flex-col p-2"
                   >
-                    <div className={`text-left ${SUIT_COLORS[card.suit]}`}>
+                    {/* Obere linke Ecke */}
+                    <div className={`flex flex-col items-start text-xs leading-none ${SUIT_COLORS[card.suit]}`}>
                       <div className="font-bold">{card.rank}</div>
-                      <div className="text-xl">{CARD_SUITS[card.suit]}</div>
+                      <div className="text-sm">{CARD_SUITS[card.suit]}</div>
                     </div>
-                    <div className={`text-center text-3xl ${SUIT_COLORS[card.suit]}`}>
+                    
+                    {/* Mittleres großes Symbol */}
+                    <div className={`flex-1 flex items-center justify-center text-2xl ${SUIT_COLORS[card.suit]}`}>
                       {CARD_SUITS[card.suit]}
                     </div>
-                    <div className={`text-right transform rotate-180 ${SUIT_COLORS[card.suit]}`}>
+                    
+                    {/* Untere rechte Ecke (umgedreht) */}
+                    <div className={`flex flex-col items-end text-xs leading-none transform rotate-180 ${SUIT_COLORS[card.suit]}`}>
                       <div className="font-bold">{card.rank}</div>
-                      <div className="text-xl">{CARD_SUITS[card.suit]}</div>
+                      <div className="text-sm">{CARD_SUITS[card.suit]}</div>
                     </div>
                   </motion.div>
                 ))}

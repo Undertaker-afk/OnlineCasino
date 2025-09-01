@@ -133,12 +133,23 @@ export default function RoulettePage() {
       }
 
       // Spielsitzung speichern
-      saveGameSession({
-        gameType: 'roulette',
-        betAmount: totalBetAmount,
-        winAmount: totalWin,
-        result: result
-      });
+      try {
+        const gameSession = {
+          id: 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2),
+          gameType: 'roulette' as const,
+          betAmount: totalBetAmount,
+          winAmount: totalWin,
+          result: result,
+          date: new Date().toISOString(),
+          profit: totalWin - totalBetAmount
+        };
+        
+        const existingSessions = JSON.parse(localStorage.getItem('casino_game_sessions') || '[]');
+        existingSessions.push(gameSession);
+        localStorage.setItem('casino_game_sessions', JSON.stringify(existingSessions));
+      } catch (error) {
+        console.error('Fehler beim Speichern der Spielsitzung:', error);
+      }
     }, 3000);
   };
 

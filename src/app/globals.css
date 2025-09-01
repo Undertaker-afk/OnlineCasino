@@ -19,8 +19,12 @@
   }
   
   .casino-card {
-    @apply bg-white text-black rounded-lg shadow-lg p-4 
-           transform transition-all duration-300;
+    @apply bg-white text-black rounded-lg shadow-lg
+           transform transition-all duration-300 relative
+           border border-gray-300;
+    padding: 8px;
+    min-width: 80px;
+    min-height: 112px;
   }
   
   .casino-chip {
