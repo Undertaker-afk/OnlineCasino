@@ -50,77 +50,151 @@ interface DailyStats {
 export default function StatsPage() {
   const { state } = useApp();
   
-  // Mock-Daten für Demo (später aus Datenbank laden)
+  // Echte Statistiken aus localStorage laden
   const [gameStats, setGameStats] = useState<GameStats>({
-    totalGames: 247,
-    totalWins: 134,
-    totalLosses: 98,
-    totalWagered: 5420.50,
-    totalWon: 6180.25,
-    netProfit: 759.75,
-    winRate: 54.3,
+    totalGames: 0,
+    totalWins: 0,
+    totalLosses: 0,
+    totalWagered: 0,
+    totalWon: 0,
+    netProfit: 0,
+    winRate: 0,
     favoriteGame: 'blackjack',
-    biggestWin: 450.00,
-    biggestLoss: -125.00
+    biggestWin: 0,
+    biggestLoss: 0
   });
 
-  const [recentSessions] = useState<GameSession[]>([
-    {
-      id: '1',
-      gameType: 'blackjack',
-      betAmount: 25,
-      winAmount: 50,
-      result: 'win',
-      date: new Date(Date.now() - 1000 * 60 * 30), // 30 min ago
-      profit: 25
-    },
-    {
-      id: '2',
-      gameType: 'roulette',
-      betAmount: 15,
-      winAmount: 0,
-      result: 'lose',
-      date: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-      profit: -15
-    },
-    {
-      id: '3',
-      gameType: 'slots',
-      betAmount: 10,
-      winAmount: 85,
-      result: 'win',
-      date: new Date(Date.now() - 1000 * 60 * 90), // 1.5 hours ago
-      profit: 75
-    },
-    {
-      id: '4',
-      gameType: 'blackjack',
-      betAmount: 50,
-      winAmount: 0,
-      result: 'lose',
-      date: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
-      profit: -50
-    },
-    {
-      id: '5',
-      gameType: 'roulette',
-      betAmount: 20,
-      winAmount: 40,
-      result: 'win',
-      date: new Date(Date.now() - 1000 * 60 * 180), // 3 hours ago
-      profit: 20
-    }
-  ]);
+  const [recentSessions, setRecentSessions] = useState<GameSession[]>([]);
+  const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
 
-  const [dailyStats] = useState<DailyStats[]>([
-    { date: 'Mo', profit: 125.50, gamesPlayed: 15 },
-    { date: 'Di', profit: -45.25, gamesPlayed: 8 },
-    { date: 'Mi', profit: 280.75, gamesPlayed: 22 },
-    { date: 'Do', profit: -88.00, gamesPlayed: 12 },
-    { date: 'Fr', profit: 195.25, gamesPlayed: 18 },
-    { date: 'Sa', profit: 342.50, gamesPlayed: 28 },
-    { date: 'So', profit: -51.00, gamesPlayed: 9 }
-  ]);
+  // Statistiken beim Laden der Komponente berechnen
+  useEffect(() => {
+    const calculateStats = () => {
+      try {
+        // Spielsessions aus localStorage laden
+        const savedSessions = localStorage.getItem('casino_game_sessions');
+        const sessions: GameSession[] = savedSessions ? JSON.parse(savedSessions) : [];
+        
+        if (sessions.length === 0) {
+          // Keine Spiele gespielt
+          setRecentSessions([]);
+          setDailyStats([]);
+          return;
+        }
+
+        // Grundstatistiken berechnen
+        const totalGames = sessions.length;
+        const totalWins = sessions.filter(s => s.result === 'win').length;
+        const totalLosses = sessions.filter(s => s.result === 'lose').length;
+        const totalWagered = sessions.reduce((sum, s) => sum + s.betAmount, 0);
+        const totalWon = sessions.reduce((sum, s) => sum + s.winAmount, 0);
+        const netProfit = totalWon - totalWagered;
+        const winRate = totalGames > 0 ? (totalWins / totalGames) * 100 : 0;
+
+        // Lieblingsspiel finden
+        const gameTypeCounts = sessions.reduce((acc, session) => {
+          acc[session.gameType] = (acc[session.gameType] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        
+        const favoriteGame = Object.entries(gameTypeCounts).reduce((a, b) => 
+          gameTypeCounts[a[0]] > gameTypeCounts[b[0]] ? a : b
+        )[0] || 'blackjack';
+
+        // Größter Gewinn und Verlust
+        const profits = sessions.map(s => s.profit);
+        const biggestWin = Math.max(...profits, 0);
+        const biggestLoss = Math.min(...profits, 0);
+
+        setGameStats({
+          totalGames,
+          totalWins,
+          totalLosses,
+          totalWagered,
+          totalWon,
+          netProfit,
+          winRate,
+          favoriteGame,
+          biggestWin,
+          biggestLoss
+        });
+
+        // Neueste Sessions (letzte 10)
+        const recentSessions = sessions
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .slice(0, 10)
+          .map(session => ({
+            ...session,
+            date: new Date(session.date)
+          }));
+        
+        setRecentSessions(recentSessions);
+
+        // Tägliche Statistiken für die letzten 7 Tage berechnen
+        const today = new Date();
+        const weeklyStats: DailyStats[] = [];
+        
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          const dayName = date.toLocaleDateString('de-DE', { weekday: 'short' });
+          
+          const dayStart = new Date(date);
+          dayStart.setHours(0, 0, 0, 0);
+          const dayEnd = new Date(date);
+          dayEnd.setHours(23, 59, 59, 999);
+          
+          const daySessions = sessions.filter(session => {
+            const sessionDate = new Date(session.date);
+            return sessionDate >= dayStart && sessionDate <= dayEnd;
+          });
+          
+          const dayProfit = daySessions.reduce((sum, session) => sum + session.profit, 0);
+          const gamesPlayed = daySessions.length;
+          
+          weeklyStats.push({
+            date: dayName,
+            profit: dayProfit,
+            gamesPlayed
+          });
+        }
+        
+        setDailyStats(weeklyStats);
+        
+      } catch (error) {
+        console.error('Fehler beim Berechnen der Statistiken:', error);
+        // Fallback zu leeren Daten
+        setGameStats({
+          totalGames: 0,
+          totalWins: 0,
+          totalLosses: 0,
+          totalWagered: 0,
+          totalWon: 0,
+          netProfit: 0,
+          winRate: 0,
+          favoriteGame: 'blackjack',
+          biggestWin: 0,
+          biggestLoss: 0
+        });
+        setRecentSessions([]);
+        setDailyStats([]);
+      }
+    };
+
+    calculateStats();
+    
+    // Event Listener für Storage-Änderungen
+    const handleStorageChange = () => {
+      calculateStats();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [state.user]);
 
   const gameTypeNames = {
     blackjack: 'Blackjack',
