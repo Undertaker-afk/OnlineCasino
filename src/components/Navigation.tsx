@@ -33,13 +33,16 @@ export function Navigation() {
             
             {state.isAuthenticated ? (
               <div className="flex items-center space-x-4">
-                {/* Balance Display */}
-                <div className="flex items-center space-x-2 bg-casino-dark px-3 py-2 rounded-lg">
-                  <Coins className="h-4 w-4 text-casino-gold" />
+                {/* Balance Display - Clickable */}
+                <Link 
+                  href="/stats"
+                  className="flex items-center space-x-2 bg-casino-dark px-3 py-2 rounded-lg hover:bg-opacity-80 transition-all cursor-pointer group"
+                >
+                  <Coins className="h-4 w-4 text-casino-gold group-hover:scale-110 transition-transform" />
                   <span className="text-casino-gold font-semibold">
                     €{state.gameState.balance.toFixed(2)}
                   </span>
-                </div>
+                </Link>
 
                 {/* User Info */}
                 <div className="flex items-center space-x-2">
@@ -116,12 +119,16 @@ export function Navigation() {
                     <span className="text-white">
                       {state.user?.username || 'Anonym'}
                     </span>
-                    <div className="flex items-center space-x-2">
+                    <Link 
+                      href="/stats"
+                      className="flex items-center space-x-2 hover:bg-casino-dark px-2 py-1 rounded transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
                       <Coins className="h-4 w-4 text-casino-gold" />
                       <span className="text-casino-gold font-semibold">
                         €{state.gameState.balance.toFixed(2)}
                       </span>
-                    </div>
+                    </Link>
                   </div>
                   
                   <button

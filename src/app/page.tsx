@@ -3,8 +3,15 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Dices, Heart, Target, Crown, Coins, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function HomePage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -12,28 +19,30 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-br from-casino-dark via-casino-darker to-black opacity-90" />
         
         {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-casino-gold rounded-full"
-              initial={{ 
-                x: Math.random() * window.innerWidth, 
-                y: Math.random() * window.innerHeight,
-                opacity: 0 
-              }}
-              animate={{
-                y: [null, -20, 0],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: 3 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
+        {mounted && (
+          <div className="absolute inset-0">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-2 h-2 bg-casino-gold rounded-full"
+                initial={{ 
+                  x: Math.random() * window.innerWidth, 
+                  y: Math.random() * window.innerHeight,
+                  opacity: 0 
+                }}
+                animate={{
+                  y: [null, -20, 0],
+                  opacity: [0, 1, 0],
+                }}
+                transition={{
+                  duration: 3 + Math.random() * 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
           <motion.div
